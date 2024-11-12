@@ -4,13 +4,13 @@ public class Game {
     private Player player;
     private Room[] rooms;
     private int currentRoom;
-    private Timer timer;
+    private GameTimer gameTimer;
 
     public Game(Player player) {
         this.player = player;
         this.rooms = new Room[9];
         this.currentRoom = 4;  // Room 5 (index 4)
-        this.timer = new Timer();
+        this.gameTimer = new GameTimer(player, this);
         initializeRooms();
     }
 
@@ -56,23 +56,29 @@ public class Game {
         Scanner scanner = new Scanner(System.in);
         boolean gameRunning = true;
     
-        startTimer();  // Start the timer to reduce HP
+        gameTimer.startTimer();  // Start the timer to reduce HP
     
         while (gameRunning) {
-            Main.clearScreen();
-            displayMenu();
+            UI.clearScreen();
+            UI.displayMenu(player);
     
-            int choice = Main.getValidatedInput(scanner, 1, 5);
-            Main.clearScreen();
+            int choice = UI.getValidatedInput(scanner, 1, 5);
+            UI.clearScreen();
             switch (choice) {
-                case 1 -> act(scanner);
-                case 2 -> displayItems(scanner);
-                case 3 -> displayLog(scanner);
-                case 4 -> {
+                case 1:
+                    act(scanner);
+                    break;
+                case 2:
+                    player.displayItems(scanner);
+                    break;
+                case 3:
+                    player.displayLog(scanner);
+                    break;
+                case 4:
                     System.out.println("Settings are not implemented yet.");
-                    Main.promptEnterKey(scanner);
-                }
-                case 5 -> {
+                    UI.promptEnterKey(scanner);
+                    break;
+                case 5:
                     System.out.println("Are you sure you want to give up? (y/n)");
                     String confirm = scanner.nextLine().trim().toLowerCase();
                     if (confirm.equals("y")) {
@@ -80,26 +86,26 @@ public class Game {
                         triggerBadEnding();  // Pass the game instance to the ending
                     } else {
                         System.out.println("Continuing the game...");
-                        Main.promptEnterKey(scanner);
+                        UI.promptEnterKey(scanner);
                     }
-                }
-                default -> {
+                    break;
+                default:
                     System.out.println("Invalid choice. Try again.");
-                    Main.promptEnterKey(scanner);
-                }
+                    UI.promptEnterKey(scanner);
+                    break;
             }
         }
     }
     
-    private void triggerGoodEnding() {
+    public void triggerGoodEnding() {
         Ending.displayGoodEnding(this);  // Pass the game instance to the ending
     }
     
-    private void triggerNeutralEnding() {
+    public void triggerNeutralEnding() {
         Ending.displayNeutralEnding(this);  // Pass the game instance to the ending
     }
     
-    private void triggerBadEnding() {
+    public void triggerBadEnding() {
         Ending.displayBadEnding(this);  // Pass the game instance to the ending
     }
        
@@ -107,46 +113,55 @@ public class Game {
         System.out.println("Choose an action:");
         System.out.println("1. Move");
         System.out.println("2. Inspect");
-        int choice = Main.getValidatedInput(scanner, 1, 2);
+        int choice = UI.getValidatedInput(scanner, 1, 2);
     
-        Main.clearScreen();
+        UI.clearScreen();
         switch (choice) {
-            case 1 -> move(scanner);
-            case 2 -> {
+            case 1:
+                move(scanner);
+                break;
+            case 2:
                 if (rooms[currentRoom].isLight() || playerHasLightSource()) {
                     rooms[currentRoom].inspect();
                 } else {
                     System.out.println("It's too dark to see anything. You need a light source.");
                 }
-                Main.promptEnterKey(scanner);
-            }
-            default -> {
+                UI.promptEnterKey(scanner);
+                break;
+            default:
                 System.out.println("Invalid choice. Try again.");
-                Main.promptEnterKey(scanner);
-            }
+                UI.promptEnterKey(scanner);
+                break;
         }
-    }    
+    }
     
     private boolean playerHasLightSource() {
         return player.getItems().stream().anyMatch(Item::isLightSource);
     }
      
-
     private void move(Scanner scanner) {
         System.out.println("Choose a direction to move:");
         System.out.println("1. Up");
         System.out.println("2. Down");
         System.out.println("3. Left");
         System.out.println("4. Right");
-        int direction = Main.getValidatedInput(scanner, 1, 4);
+        int direction = UI.getValidatedInput(scanner, 1, 4);
 
-        Main.clearScreen();
+        UI.clearScreen();
         int newRoom = -1;
         switch (direction) {
-            case 1 -> newRoom = currentRoom - 3;
-            case 2 -> newRoom = currentRoom + 3;
-            case 3 -> newRoom = currentRoom - 1;
-            case 4 -> newRoom = currentRoom + 1;
+            case 1:
+                newRoom = currentRoom - 3;
+                break;
+            case 2:
+                newRoom = currentRoom + 3;
+                break;
+            case 3:
+                newRoom = currentRoom - 1;
+                break;
+            case 4:
+                newRoom = currentRoom + 1;
+                break;
         }
 
         if (newRoom >= 0 && newRoom < rooms.length && (direction == 3 || direction == 4 ? newRoom / 3 == currentRoom / 3 : true)) {
@@ -157,158 +172,6 @@ public class Game {
         } else {
             System.out.println("You can't move in that direction.");
         }
-        Main.promptEnterKey(scanner);
+        UI.promptEnterKey(scanner);
     }
-
-    private void displayMenu() {
-        int maxHp = 10;  
-    
-        System.out.println("________________________________________________________________________");
-        System.out.println("Player :  " + player.getName());
-        System.out.println("HP :  " + player.getHp() + " / " + maxHp + " " + generateHpBar(player.getHp(), maxHp));
-        System.out.println("\n\n\n________________________________________________________________________");
-        System.out.println("Select Option :");
-        System.out.printf("%-15s %-15s %-15s %-15s %-15s%n", "1.)  Act", "2.)  Items", "3.)  Log", "4.)  Settings", "5.)  Give Up");
-        System.out.println("________________________________________________________________________");
-    }    
-    
-    private void displayItems(Scanner scanner) {
-        Main.clearScreen();
-        System.out.println("Inventory:");
-    
-        List<Item> items = new ArrayList<>(player.getItems());
-        items.sort(Comparator.comparing(Item::getName));  // Sort items alphabetically
-    
-        if (items.isEmpty()) {
-            System.out.println("Your inventory is empty.");
-        } else {
-            for (int i = 0; i < items.size(); i++) {
-                System.out.println((i + 1) + ". " + items.get(i).getName());
-            }
-            System.out.println((items.size() + 1) + ". Go back");
-            
-            System.out.print("Select an item by number: ");
-            int choice = Main.getValidatedInput(scanner, 1, items.size() + 1);
-    
-            if (choice <= items.size()) {
-                displayItemDetails(scanner, items.get(choice - 1));
-            }
-        }
-        Main.promptEnterKey(scanner);
-    }
-    
-    private void displayItemDetails(Scanner scanner, Item item) {
-        Main.clearScreen();
-        System.out.println("Item: " + item.getName());
-        System.out.println("Description: " + item.getDescription());
-    
-
-        System.out.println("1. Use item");
-        System.out.println("2. Go back");
-    
-        System.out.print("Select an option: ");
-        int choice = Main.getValidatedInput(scanner, 1, 2);
-    
-        switch (choice) {
-            case 1 -> useItem(scanner, item);
-            case 2 -> displayItems(scanner);
-            default -> {
-                System.out.println("Invalid choice. Try again.");
-                Main.promptEnterKey(scanner);
-                displayItemDetails(scanner, item);
-            }
-        }
-    }
-    
-    private void useItem(Scanner scanner, Item item) {
-        Main.clearScreen();
-        System.out.println("Using item: " + item.getName());
-    
-        if (item.getName().equalsIgnoreCase("Map")) {
-            displayMap();
-        } else if (item.getName().equalsIgnoreCase("Blanket")) {
-            player.addHp(2);
-            System.out.println("You used the Blanket and gained 2 HP.");
-            player.getItems().remove(item);  // Remove the blanket after use
-        } else if (item.getName().equalsIgnoreCase("Lamp")) {
-            if (player.getItems().stream().anyMatch(i -> i.getName().equalsIgnoreCase("Note"))) {
-                decodeNote();
-            } else {
-                System.out.println("You have no note to decode.");
-            }
-        }
-    
-        Main.promptEnterKey(scanner);
-        displayItems(scanner);
-    }
-    
-    
-    private void decodeNote() {
-        System.out.println("Decoding the note with the Lamp...");
-        System.out.println("The note reads: 'Hidden message revealed!'");
-        // Update the player's log or inventory as needed
-    }
-    
-    private void displayLog(Scanner scanner) {
-        Main.clearScreen();
-        System.out.println("Log:");
-        for (String entry : player.getLog()) {
-            System.out.println("- " + entry);
-        }
-        Main.promptEnterKey(scanner);
-    }
-
-    private String generateHpBar(int hp, int maxHp) {
-        int barLength = maxHp;  // Length of the HP bar
-        int hpBars = (int) ((double) hp / maxHp * barLength);
-        StringBuilder hpBar = new StringBuilder("[");
-    
-        for (int i = 0; i < barLength; i++) {
-            if (i < barLength - hpBars) {
-                hpBar.append("-");  // Represents missing HP with a space
-            } else {
-                hpBar.append("#");  // Represents current HP using '='
-            }
-        }
-        hpBar.append("]");
-        return hpBar.toString();
-    }
-
-    private void displayMap() {
-        System.out.println("Map:");
-        System.out.println(" _______________________\r\n"+
-                           "|       |       |       |\r\n"+
-                           "|   1   H   2   H   3   |\r\n"+
-                           "|__===__|__===__|__===__|\r\n"+
-                           "|       |       |       |\r\n"+
-                           "|   4   H   5   H   6   |\r\n"+
-                           "|__===__|__===__|__===__|\r\n"+
-                           "|       |       |       |\r\n"+
-                           "|   7   H   8   H   9   |\r\n"+
-                           "|_______|__===__|_______|\r\n");
-        System.out.println("\nLegend:");
-        System.out.println("== & H <- Door");
-    }
-    
-    private void startTimer() {
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                player.addHp(-1);  // Reduce HP by 1 every 30 seconds
-                player.addToLog("HP decreased by 1. Current HP: " + player.getHp());  // Log the HP decrease
-                System.out.println("Your HP decreased by 1. Current HP: " + player.getHp());
-                if (player.getHp() <= 0) {
-                    triggerNeutralEnding();;  // Trigger bad ending when HP is 0
-                }
-            }
-        };
-        timer.scheduleAtFixedRate(task, 30000, 30000);  // Schedule the task to run every 30 seconds
-    }
-
-    public void stopTimer() {
-        if (timer != null) {
-            timer.cancel();
-        }
-    }
-
 }

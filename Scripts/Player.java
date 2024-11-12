@@ -43,7 +43,7 @@ public class Player {
     }
 
     public void displayItems(Scanner scanner) {
-        Main.clearScreen();
+        UI.clearScreen();
         System.out.println("Inventory:");
 
         List<Item> items = new ArrayList<>(getItems());
@@ -58,17 +58,17 @@ public class Player {
             System.out.println((items.size() + 1) + ". Go back");
 
             System.out.print("Select an item by number: ");
-            int choice = Main.getValidatedInput(scanner, 1, items.size() + 1);
+            int choice = UI.getValidatedInput(scanner, 1, items.size() + 1);
 
             if (choice <= items.size()) {
                 displayItemDetails(scanner, items.get(choice - 1));
             }
         }
-        Main.promptEnterKey(scanner);
+        UI.promptEnterKey(scanner);
     }
 
     private void displayItemDetails(Scanner scanner, Item item) {
-        Main.clearScreen();
+        UI.clearScreen();
         System.out.println("Item: " + item.getName());
         System.out.println("Description: " + item.getDescription());
 
@@ -76,70 +76,49 @@ public class Player {
         System.out.println("2. Go back");
 
         System.out.print("Select an option: ");
-        int choice = Main.getValidatedInput(scanner, 1, 2);
+        int choice = UI.getValidatedInput(scanner, 1, 2);
 
         switch (choice) {
             case 1 -> useItem(scanner, item);
             case 2 -> displayItems(scanner);
             default -> {
                 System.out.println("Invalid choice. Try again.");
-                Main.promptEnterKey(scanner);
+                UI.promptEnterKey(scanner);
                 displayItemDetails(scanner, item);
             }
         }
     }
 
     private void useItem(Scanner scanner, Item item) {
-        Main.clearScreen();
+        UI.clearScreen();
         System.out.println("Using item: " + item.getName());
 
-        if (item.getName().equalsIgnoreCase("Map")) {
-            displayMap();
-        } else if (item.getName().equalsIgnoreCase("Blanket")) {
-            addHp(2);
-            System.out.println("You used the Blanket and gained 2 HP.");
-            getItems().remove(item);  // Remove the blanket after use
-        } else if (item.getName().equalsIgnoreCase("Lamp")) {
-            if (getItems().stream().anyMatch(i -> i.getName().equalsIgnoreCase("Note"))) {
-                decodeNote();
-            } else {
-                System.out.println("You have no note to decode.");
-            }
+        switch (item.getName().toLowerCase()) {
+            case "map":
+                item.displayMap();
+                break;
+            case "blanket":
+                item.useBlanket(this);
+                break;
+            case "lamp":
+                item.useLamp(this);
+                break;
+            default:
+                System.out.println("Nothing special happens.");
+                break;
         }
 
-        Main.promptEnterKey(scanner);
+        UI.promptEnterKey(scanner);
         displayItems(scanner);
     }
 
-    private void decodeNote() {
-        System.out.println("Decoding the note with the Lamp...");
-        System.out.println("The note reads: 'Hidden message revealed!'");
-        // Update the player's log or inventory as needed
-    }
-
     public void displayLog(Scanner scanner) {
-        Main.clearScreen();
+        UI.clearScreen();
         System.out.println("Log:");
         for (String entry : getLog()) {
             System.out.println("- " + entry);
         }
-        Main.promptEnterKey(scanner);
-    }
-
-    private void displayMap() {
-        System.out.println("Map:");
-        System.out.println(" _______________________\r\n"+
-                           "|       |       |       |\r\n"+
-                           "|   1   H   2   H   3   |\r\n"+
-                           "|__===__|__===__|__===__|\r\n"+
-                           "|       |       |       |\r\n"+
-                           "|   4   H   5   H   6   |\r\n"+
-                           "|__===__|__===__|__===__|\r\n"+
-                           "|       |       |       |\r\n"+
-                           "|   7   H   8   H   9   |\r\n"+
-                           "|_______|__===__|_______|\r\n");
-        System.out.println("\nLegend:");
-        System.out.println("== & H <- Door");
+        UI.promptEnterKey(scanner);
     }
 
     @Override
