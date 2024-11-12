@@ -26,7 +26,7 @@
             <p>How to use the project:</p>
             <pre><code>npm start</code></pre>
         </section>
-        <section> //License
+        <section //License> 
             <h2>License</h2>
             <p>This project is licensed under the MIT License.</p>
         </section>
