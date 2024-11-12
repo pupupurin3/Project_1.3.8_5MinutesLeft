@@ -67,6 +67,14 @@ public class Item {
         System.out.println("== & H <- Door");
     }
 
+    public void useRustyKey(Player player, Room currentRoom, Game game) {
+        if (currentRoom.getRoomNumber() == 8) {
+            game.triggerGoodEnding();
+        } else {
+            System.out.println("The Rusty Key doesn't seem to fit any lock here.");
+        }
+    }
+
     @Override
     public String toString() {
         return "Item [name=" + name + ", description=" + description + ", lightSource=" + lightSource + "]";

@@ -69,7 +69,7 @@ public class Game {
                     act(scanner);
                     break;
                 case 2:
-                    player.displayItems(scanner);
+                    player.displayItems(scanner, rooms[currentRoom], this);
                     break;
                 case 3:
                     player.displayLog(scanner);
@@ -108,6 +108,7 @@ public class Game {
     public void triggerBadEnding() {
         Ending.displayBadEnding(this);  // Pass the game instance to the ending
     }
+    
        
     private void act(Scanner scanner) {
         System.out.println("Choose an action:");
@@ -134,7 +135,7 @@ public class Game {
                 break;
         }
     }
-    
+
     private boolean playerHasLightSource() {
         return player.getItems().stream().anyMatch(Item::isLightSource);
     }
@@ -173,5 +174,13 @@ public class Game {
             System.out.println("You can't move in that direction.");
         }
         UI.promptEnterKey(scanner);
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+    
+    public Room getCurrentRoom() {
+        return rooms[currentRoom];
     }
 }

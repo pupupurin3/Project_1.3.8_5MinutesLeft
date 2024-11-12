@@ -42,7 +42,7 @@ public class Player {
         this.log.add(entry);
     }
 
-    public void displayItems(Scanner scanner) {
+    public void displayItems(Scanner scanner, Room currentRoom, Game game) {
         UI.clearScreen();
         System.out.println("Inventory:");
 
@@ -61,13 +61,13 @@ public class Player {
             int choice = UI.getValidatedInput(scanner, 1, items.size() + 1);
 
             if (choice <= items.size()) {
-                displayItemDetails(scanner, items.get(choice - 1));
+                displayItemDetails(scanner, items.get(choice - 1), currentRoom, game);
             }
         }
         UI.promptEnterKey(scanner);
     }
 
-    private void displayItemDetails(Scanner scanner, Item item) {
+    private void displayItemDetails(Scanner scanner, Item item, Room currentRoom, Game game) {
         UI.clearScreen();
         System.out.println("Item: " + item.getName());
         System.out.println("Description: " + item.getDescription());
@@ -79,17 +79,21 @@ public class Player {
         int choice = UI.getValidatedInput(scanner, 1, 2);
 
         switch (choice) {
-            case 1 -> useItem(scanner, item);
-            case 2 -> displayItems(scanner);
-            default -> {
+            case 1:
+                useItem(scanner, item, currentRoom, game);
+                break;
+            case 2:
+                displayItems(scanner, currentRoom, game);
+                break;
+            default:
                 System.out.println("Invalid choice. Try again.");
                 UI.promptEnterKey(scanner);
-                displayItemDetails(scanner, item);
-            }
+                displayItemDetails(scanner, item, currentRoom, game);
+                break;
         }
     }
 
-    private void useItem(Scanner scanner, Item item) {
+    private void useItem(Scanner scanner, Item item, Room currentRoom, Game game) {
         UI.clearScreen();
         System.out.println("Using item: " + item.getName());
 
@@ -103,13 +107,16 @@ public class Player {
             case "lamp":
                 item.useLamp(this);
                 break;
+            case "rusty key":
+                item.useRustyKey(this, currentRoom, game);
+                break;
             default:
                 System.out.println("Nothing special happens.");
                 break;
         }
 
         UI.promptEnterKey(scanner);
-        displayItems(scanner);
+        displayItems(scanner, currentRoom, game);
     }
 
     public void displayLog(Scanner scanner) {
