@@ -1,11 +1,70 @@
+/*+----------------------------------------------------------------------
+ ||
+ ||  Class Game 
+ ||
+ ||         Author:  Noah Matsukuma
+ ||
+ ||        Purpose:  This class represents the main game logic and controls the game's flow.
+ ||                  It manages the player's interactions, the rooms, and the game state.
+ ||
+ ||  Inherits From:  None             
+ ||
+ ||     Interfaces:  None
+ ||                  
+ |+-----------------------------------------------------------------------
+ ||
+ ||      Constants:  None
+ ||
+ |+-----------------------------------------------------------------------
+ ||
+ ||   Constructors:  
+ ||                  Game(Player player)
+ ||                      - Initializes the game with a player, sets up rooms, and starts the game timer.
+ ||
+ ||  Class Methods:  None
+ ||
+ ||  Inst. Methods:  
+ ||                  void start()
+ ||                      - Starts the game and handles the main game loop.
+ ||
+ ||                  void triggerGoodEnding()
+ ||                      - Triggers the good ending of the game.
+ ||
+ ||                  void triggerNeutralEnding()
+ ||                      - Triggers the neutral ending of the game.
+ ||
+ ||                  void triggerBadEnding()
+ ||                      - Triggers the bad ending of the game.
+ ||
+ ||                  Player getPlayer()
+ ||                      - Returns the player object.
+ ||
+ ||                  Room getCurrentRoom()
+ ||                      - Returns the current room the player is in.
+ ||
+ ||                  private void initializeRooms()
+ ||                      - Initializes the rooms in the game.
+ ||
+ ||                  private void act(Scanner scanner)
+ ||                      - Handles player actions such as moving or inspecting the room.
+ ||
+ ||                  private boolean playerHasLightSource()
+ ||                      - Checks if the player has a light source in their inventory.
+ ||
+ ||                  private void move(Scanner scanner)
+ ||                      - Handles the player's movement between rooms.
+ ||
+ ++-----------------------------------------------------------------------*/
+
 import java.util.*;
 
 public class Game {
+    public boolean gameRunning;
     private Player player;
     private Room[] rooms;
     private int currentRoom;
     private GameTimer gameTimer;
-
+ 
     public Game(Player player) {
         this.player = player;
         this.rooms = new Room[9];
@@ -13,7 +72,23 @@ public class Game {
         this.gameTimer = new GameTimer(player, this);
         initializeRooms();
     }
-
+     
+     /*---------------------------------------------------------------------
+    |  Method initializeRooms
+    |
+    |  Purpose:  Initializes the rooms in the game with their respective
+    |            descriptions, items, and lighting conditions.
+    |
+    |  Pre-condition:  The rooms array must be declared and have a size
+    |                  of 9 elements.
+    |
+    |  Post-condition: Each room in the rooms array is initialized with
+    |                  specific attributes.
+    |
+    |  Parameters:  None
+    |
+    |  Returns:  None
+    *-------------------------------------------------------------------*/
     private void initializeRooms() {
         rooms[0] = new Room(1, "You are in a dark room, and you barely can see a foot into the room. \nBut as soon as you enter the room you feel crushed up paper all over the floor",
                             "The room is damp and filled with cobwebs. You can barely see anything without a light source.",
@@ -51,10 +126,26 @@ public class Game {
                             "The barred window offers a glimpse of the outside, but the room is dark.",
                             false, new ArrayList<>(Arrays.asList(new Item("Written Note", "A note, it reads the following\n\"Humans when drowned only has 5 minutes of time to spare before someone does CPR and save them.\"", false))), player);
     }
-    
+     
+    /*---------------------------------------------------------------------
+    |  Method start
+    |
+    |  Purpose:  Starts the game and handles the main game loop. It displays
+    |            the menu and processes user inputs to perform various actions.
+    |
+    |  Pre-condition:  The player and rooms must be initialized. The gameRunning
+    |                  flag should be set to true.
+    |
+    |  Post-condition: The game loop runs until the player chooses to exit or
+    |                  an ending is triggered.
+    |
+    |  Parameters:  None
+    |
+    |  Returns:  None
+    *-------------------------------------------------------------------*/
     public void start() {
         Scanner scanner = new Scanner(System.in);
-        boolean gameRunning = true;
+        gameRunning = true;
     
         gameTimer.startTimer();  // Start the timer to reduce HP
     
@@ -96,26 +187,91 @@ public class Game {
             }
         }
     }
-    
+
+
+
+    /*---------------------------------------------------------------------
+    |  Method triggerGoodEnding
+    |
+    |  Purpose:  Triggers the good ending of the game by calling the corresponding
+    |            method in the Ending class.
+    |
+    |  Pre-condition:  The game instance should be active, and an appropriate
+    |                  condition for the good ending must be met.
+    |
+    |  Post-condition: The good ending sequence is displayed, and the game ends.
+    |
+    |  Parameters:  None
+    |
+    |  Returns:  None
+    *-------------------------------------------------------------------*/
     public void triggerGoodEnding() {
         Ending.displayGoodEnding(this);  // Pass the game instance to the ending
     }
-    
+     
+
+    /*---------------------------------------------------------------------
+    |  Method triggerNeutralEnding
+    |
+    |  Purpose:  Triggers the neutral ending of the game by calling the corresponding
+    |            method in the Ending class.
+    |
+    |  Pre-condition:  The game instance should be active, and an appropriate
+    |                  condition for the neutral ending must be met.
+    |
+    |  Post-condition: The neutral ending sequence is displayed, and the game ends.
+    |
+    |  Parameters:  None
+    |
+    |  Returns:  None
+    *-------------------------------------------------------------------*/    
     public void triggerNeutralEnding() {
         Ending.displayNeutralEnding(this);  // Pass the game instance to the ending
     }
-    
+     
+
+    /*---------------------------------------------------------------------
+    |  Method triggerBadEnding
+    |
+    |  Purpose:  Triggers the bad ending of the game by calling the corresponding
+    |            method in the Ending class.
+    |
+    |  Pre-condition:  The game instance should be active, and an appropriate
+    |                  condition for the bad ending must be met.
+    |
+    |  Post-condition: The bad ending sequence is displayed, and the game ends.
+    |
+    |  Parameters:  None
+    |
+    |  Returns:  None
+    *-------------------------------------------------------------------*/
     public void triggerBadEnding() {
         Ending.displayBadEnding(this);  // Pass the game instance to the ending
     }
-    
-       
+      
+    /*---------------------------------------------------------------------
+    |  Method act
+    |
+    |  Purpose:  Handles player actions such as moving or inspecting the room,
+    |            depending on the user's input.
+    |
+    |  Pre-condition:  The game should be running, and the player must be
+    |                  positioned in a room.
+    |
+    |  Post-condition: The player performs an action, such as moving to another
+    |                  room or inspecting the current room.
+    |
+    |  Parameters:
+    |      scanner -- Scanner object for reading user input.
+    |
+    |  Returns:  None
+    *-------------------------------------------------------------------*/
     private void act(Scanner scanner) {
         System.out.println("Choose an action:");
         System.out.println("1. Move");
         System.out.println("2. Inspect");
         int choice = UI.getValidatedInput(scanner, 1, 2);
-    
+     
         UI.clearScreen();
         switch (choice) {
             case 1:
@@ -135,11 +291,44 @@ public class Game {
                 break;
         }
     }
-
+ 
+    /*---------------------------------------------------------------------
+    |  Method playerHasLightSource
+    |
+    |  Purpose:  Checks if the player has a light source in their inventory,
+    |            which is necessary for seeing in dark rooms.
+    |
+    |  Pre-condition:  The player's inventory must be initialized and may
+    |                  contain items.
+    |
+    |  Post-condition: Determines if there is a light source in the player's
+    |                  inventory.
+    |
+    |  Parameters:  None
+    |
+    |  Returns:  boolean -- True if a light source is found, false otherwise.
+    *-------------------------------------------------------------------*/
     private boolean playerHasLightSource() {
         return player.getItems().stream().anyMatch(Item::isLightSource);
     }
      
+    /*---------------------------------------------------------------------
+    |  Method move
+    |
+    |  Purpose:  Handles the player's movement between rooms based on the
+    |            user's input direction.
+    |
+    |  Pre-condition:  The game should be running, and the player must be
+    |                  positioned in a room.
+    |
+    |  Post-condition: The player moves to the designated room, if the move
+    |                  is valid; otherwise, an error message is displayed.
+    |
+    |  Parameters:
+    |      scanner -- Scanner object for reading user input.
+    |
+    |  Returns:  None
+    *-------------------------------------------------------------------*/
     private void move(Scanner scanner) {
         System.out.println("Choose a direction to move:");
         System.out.println("1. Up");
@@ -176,10 +365,38 @@ public class Game {
         UI.promptEnterKey(scanner);
     }
 
+    /*---------------------------------------------------------------------
+    |  Method getPlayer
+    |
+    |  Purpose:  Returns the player object associated with the game.
+    |
+    |  Pre-condition:  The player object must be initialized.
+    |
+    |  Post-condition: The player object is retrieved.
+    |
+    |  Parameters:  None
+    |
+    |  Returns:  Player -- The player object.
+    *-------------------------------------------------------------------*/
     public Player getPlayer() {
         return player;
     }
     
+
+    /*---------------------------------------------------------------------
+    |  Method getCurrentRoom
+    |
+    |  Purpose:  Returns the current room the player is in.
+    |
+    |  Pre-condition:  The rooms array must be initialized, and the
+    |                  currentRoom index must be valid.
+    |
+    |  Post-condition: The current room object is retrieved.
+    |
+    |  Parameters:  None
+    |
+    |  Returns:  Room -- The current room object.
+    *-------------------------------------------------------------------*/
     public Room getCurrentRoom() {
         return rooms[currentRoom];
     }
