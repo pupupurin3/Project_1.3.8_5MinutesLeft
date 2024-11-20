@@ -156,20 +156,14 @@ public class Game {
             int choice = UI.getValidatedInput(scanner, 1, 5);
             UI.clearScreen();
             switch (choice) {
-                case 1:
-                    act(scanner);
-                    break;
-                case 2:
-                    player.displayItems(scanner, rooms[currentRoom], this);
-                    break;
-                case 3:
-                    player.displayLog(scanner);
-                    break;
-                case 4:
+                case 1 -> act(scanner);
+                case 2 -> player.displayItems(scanner, rooms[currentRoom], this);
+                case 3 -> player.displayLog(scanner);
+                case 4 -> {
                     System.out.println("Settings are not implemented yet.");
                     UI.promptEnterKey(scanner);
-                    break;
-                case 5:
+                }
+                case 5 -> {
                     System.out.println("Are you sure you want to give up? (y/n)");
                     String confirm = scanner.nextLine().trim().toLowerCase();
                     if (confirm.equals("y")) {
@@ -179,11 +173,11 @@ public class Game {
                         System.out.println("Continuing the game...");
                         UI.promptEnterKey(scanner);
                     }
-                    break;
-                default:
+                }
+                default -> {
                     System.out.println("Invalid choice. Try again.");
                     UI.promptEnterKey(scanner);
-                    break;
+                }
             }
         }
     }
@@ -274,21 +268,19 @@ public class Game {
      
         UI.clearScreen();
         switch (choice) {
-            case 1:
-                move(scanner);
-                break;
-            case 2:
+            case 1 -> move(scanner);
+            case 2 -> {
                 if (rooms[currentRoom].isLight() || playerHasLightSource()) {
                     rooms[currentRoom].inspect();
                 } else {
                     System.out.println("It's too dark to see anything. You need a light source.");
                 }
                 UI.promptEnterKey(scanner);
-                break;
-            default:
+            }
+            default -> {
                 System.out.println("Invalid choice. Try again.");
                 UI.promptEnterKey(scanner);
-                break;
+            }
         }
     }
  
@@ -340,18 +332,10 @@ public class Game {
         UI.clearScreen();
         int newRoom = -1;
         switch (direction) {
-            case 1:
-                newRoom = currentRoom - 3;
-                break;
-            case 2:
-                newRoom = currentRoom + 3;
-                break;
-            case 3:
-                newRoom = currentRoom - 1;
-                break;
-            case 4:
-                newRoom = currentRoom + 1;
-                break;
+            case 1 -> newRoom = currentRoom - 3;
+            case 2 -> newRoom = currentRoom + 3;
+            case 3 -> newRoom = currentRoom - 1;
+            case 4 -> newRoom = currentRoom + 1;
         }
 
         if (newRoom >= 0 && newRoom < rooms.length && (direction == 3 || direction == 4 ? newRoom / 3 == currentRoom / 3 : true)) {
